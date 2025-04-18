@@ -1,12 +1,13 @@
 const express = require("express");
 const app = express();
+const userRoutes = require("./routes/userRoutes");
 
-// Middleware
 app.use(express.json());
 
-// Basic Route
+app.use("/api/users", userRoutes);
+
 app.get("/", (req, res) => {
-  res.send("Hello from Express.js!");
+  res.send("Welcome to Cafe Management API");
 });
 
 module.exports = app;
