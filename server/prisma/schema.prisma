@@ -1,0 +1,110 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id      Int     @id @default(autoincrement())
+  name    String  
+  phone   String
+  email   String  @unique
+  password String
+  role    Role
+  Customer Customer?
+  Staff    Staff?
+  Manager  Manager?
+}
+
+model Customer {
+  id       Int    @id @default(autoincrement())
+  userId   Int    @unique
+  User     User   @relation(fields: [userId], references: [id])
+  orders   Order[]
+  transfers Payment[]
+}
+
+model Staff {
+  id       Int    @id @default(autoincrement())
+  userId   Int    @unique
+  salary  Int?
+  User     User   @relation(fields: [userId], references: [id])
+  orders   Order[]
+}
+
+model Manager {
+  id       Int    @id @default(autoincrement())
+  userId   Int    @unique
+  salary  Int?
+  User     User   @relation(fields: [userId], references: [id])
+  reports  Report[]
+}
+
+model Order {
+  id          Int         @id @default(autoincrement())
+  customerId  Int
+  staffId     Int
+  total       Int
+  Customer    Customer    @relation(fields: [customerId], references: [id])
+  Staff       Staff       @relation(fields: [staffId], references: [id])
+  orderItems  OrderMenu[]
+}
+
+model OrderMenu {
+  id        Int      @id @default(autoincrement())
+  orderId   Int
+  itemId    Int
+  quantity  Int
+  Order     Order    @relation(fields: [orderId], references: [id])
+  MenuItem  MenuItem @relation(fields: [itemId], references: [id])
+}
+
+model MenuItem {
+  id          Int     @id @default(autoincrement())
+  name        String
+  description String
+  price       Int
+  quantity    Int
+  orderMenus  OrderMenu[]
+}
+
+model Inventory {
+  id            Int     @id @default(autoincrement())
+  ingredientId  Int
+  name          String
+  quantity      Int
+  reorderLevel  Int
+  reports       Report[]
+}
+
+model Payment {
+  id              Int    @id @default(autoincrement())
+  customerId      Int
+  amount          Int
+  method          String
+  transactionDate DateTime
+  Customer        Customer @relation(fields: [customerId], references: [id])
+}
+
+model Report {
+  id          Int    @id @default(autoincrement())
+  managerId   Int
+  inventoryId Int
+  Manager     Manager @relation(fields: [managerId], references: [id])
+  Inventory   Inventory @relation(fields: [inventoryId], references: [id])
+}
+
+enum Role {
+  CUSTOMER
+  STAFF
+  MANAGER
+}
