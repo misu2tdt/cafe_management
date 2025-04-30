@@ -4,39 +4,30 @@ CREATE TYPE "Role" AS ENUM ('CUSTOMER', 'STAFF', 'MANAGER');
 -- CreateTable
 CREATE TABLE "User" (
     "id" SERIAL NOT NULL,
-    "name" TEXT NOT NULL,
+    "fullname" TEXT NOT NULL,
     "phone" TEXT NOT NULL,
-    "email" TEXT NOT NULL,
+    "email" TEXT,
     "password" TEXT NOT NULL,
-    "role" "Role" NOT NULL,
+    "role" "Role" NOT NULL DEFAULT 'CUSTOMER',
 
     CONSTRAINT "User_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
 CREATE TABLE "Customer" (
-    "id" SERIAL NOT NULL,
-    "userId" INTEGER NOT NULL,
-
-    CONSTRAINT "Customer_pkey" PRIMARY KEY ("id")
+    "userId" INTEGER NOT NULL
 );
 
 -- CreateTable
 CREATE TABLE "Staff" (
-    "id" SERIAL NOT NULL,
     "userId" INTEGER NOT NULL,
-    "salary" INTEGER,
-
-    CONSTRAINT "Staff_pkey" PRIMARY KEY ("id")
+    "salary" INTEGER NOT NULL
 );
 
 -- CreateTable
 CREATE TABLE "Manager" (
-    "id" SERIAL NOT NULL,
     "userId" INTEGER NOT NULL,
-    "salary" INTEGER,
-
-    CONSTRAINT "Manager_pkey" PRIMARY KEY ("id")
+    "salary" INTEGER NOT NULL
 );
 
 -- CreateTable
@@ -45,6 +36,8 @@ CREATE TABLE "Order" (
     "customerId" INTEGER NOT NULL,
     "staffId" INTEGER NOT NULL,
     "total" INTEGER NOT NULL,
+    "paymentMethod" TEXT NOT NULL,
+    "transactionDate" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "Order_pkey" PRIMARY KEY ("id")
 );
@@ -54,6 +47,7 @@ CREATE TABLE "OrderMenu" (
     "id" SERIAL NOT NULL,
     "orderId" INTEGER NOT NULL,
     "itemId" INTEGER NOT NULL,
+    "status" TEXT NOT NULL,
     "quantity" INTEGER NOT NULL,
 
     CONSTRAINT "OrderMenu_pkey" PRIMARY KEY ("id")
@@ -79,17 +73,6 @@ CREATE TABLE "Inventory" (
     "reorderLevel" INTEGER NOT NULL,
 
     CONSTRAINT "Inventory_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "Payment" (
-    "id" SERIAL NOT NULL,
-    "customerId" INTEGER NOT NULL,
-    "amount" INTEGER NOT NULL,
-    "method" TEXT NOT NULL,
-    "transactionDate" TIMESTAMP(3) NOT NULL,
-
-    CONSTRAINT "Payment_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -123,10 +106,10 @@ ALTER TABLE "Staff" ADD CONSTRAINT "Staff_userId_fkey" FOREIGN KEY ("userId") RE
 ALTER TABLE "Manager" ADD CONSTRAINT "Manager_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Order" ADD CONSTRAINT "Order_customerId_fkey" FOREIGN KEY ("customerId") REFERENCES "Customer"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Order" ADD CONSTRAINT "Order_customerId_fkey" FOREIGN KEY ("customerId") REFERENCES "Customer"("userId") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Order" ADD CONSTRAINT "Order_staffId_fkey" FOREIGN KEY ("staffId") REFERENCES "Staff"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Order" ADD CONSTRAINT "Order_staffId_fkey" FOREIGN KEY ("staffId") REFERENCES "Staff"("userId") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "OrderMenu" ADD CONSTRAINT "OrderMenu_orderId_fkey" FOREIGN KEY ("orderId") REFERENCES "Order"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -135,10 +118,7 @@ ALTER TABLE "OrderMenu" ADD CONSTRAINT "OrderMenu_orderId_fkey" FOREIGN KEY ("or
 ALTER TABLE "OrderMenu" ADD CONSTRAINT "OrderMenu_itemId_fkey" FOREIGN KEY ("itemId") REFERENCES "MenuItem"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Payment" ADD CONSTRAINT "Payment_customerId_fkey" FOREIGN KEY ("customerId") REFERENCES "Customer"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "Report" ADD CONSTRAINT "Report_managerId_fkey" FOREIGN KEY ("managerId") REFERENCES "Manager"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Report" ADD CONSTRAINT "Report_managerId_fkey" FOREIGN KEY ("managerId") REFERENCES "Manager"("userId") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Report" ADD CONSTRAINT "Report_inventoryId_fkey" FOREIGN KEY ("inventoryId") REFERENCES "Inventory"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

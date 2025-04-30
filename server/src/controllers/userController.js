@@ -1,6 +1,10 @@
-const userModel = require("../models/userModel");
+import { UserModel } from "../models/userModel.js"
 
-exports.getAllUsers = (req, res) => {
-  const users = userModel.getAll();
-  res.json(users);
-};
+export const test = (req, res) => {
+  res.send("User controller is working!")
+}
+
+export const getAllUsers = (req, res) => {
+  const users = userModel.getAll()
+  res.json(users)
+}
