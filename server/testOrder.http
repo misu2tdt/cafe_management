@@ -1,0 +1,73 @@
+### Lấy tất cả đơn hàng
+GET http://localhost:3000/api/orders
+Content-Type: application/json
+
+###
+
+### Tạo đơn hàng mới
+POST http://localhost:3000/api/orders
+Content-Type: application/json
+
+{
+  "items": ["Tra sua", "Banh mi"],
+  "status": "Cho xac nhan",
+  "total": 60000
+}
+
+###
+
+### Lấy đơn hàng theo ID
+GET http://localhost:3000/api/orders/1
+Content-Type: application/json
+
+###
+
+### Cập nhật trạng thái đơn hàng
+PUT http://localhost:3000/api/orders/1/status
+Content-Type: application/json
+
+{
+  "newStatus": "Dang che bien"
+}
+
+###
+
+### Xóa đơn hàng
+DELETE http://localhost:3000/api/orders/1
+Content-Type: application/json
+
+#####
+POST http://localhost:3000/api/orders
+Content-Type: application/json
+
+{
+  "customerId": 2,
+  "staffId": 4,
+  "paymentMethod": "Cash",
+  "transactionDate": "2025-05-04T01:00:00.000Z",
+  "total": 50000,
+  "items": [
+    { "itemId": 1, "quantity": 2, "status": "Pending" },
+    { "itemId": 3, "quantity": 1, "status": "Pending" }
+  ]
+}
+
+### Tạo 1 User mới cho Customer
+POST http://localhost:3000/api/users
+Content-Type: application/json
+
+{
+  "fullname": "Nguyen Van A",
+  "phone": "0123456789",
+  "email": "a@example.com",
+  "password": "123456",
+  "role": "CUSTOMER"
+}
+
+### Tạo Customer gắn với User mới (giả sử userId = 4)
+POST http://localhost:3000/api/customers
+Content-Type: application/json
+
+{
+  "userId": 4
+}
