@@ -1,9 +1,13 @@
-import express from "express"
-import { test, getAllUsers} from "../controllers/userController.js"
+import express from 'express'
+import { register, login } from '../controllers/userController.js'
+
 const router = express.Router()
 
+// Đăng ký người dùng mới
+router.post('/register', register)
 
-router.get("/", test)
-router.get("/", getAllUsers)
+// Đăng nhập
+router.post('/login', login)
+
 
 export default router

@@ -1,18 +1,22 @@
 import express from "express"
-import authRoutes from "./routes/authRoutes.js"
-import auth from "./middlewares/Auth.js"
+import cors from "cors"
 import userRoutes from "./routes/userRoutes.js"
+import menuRoutes from "./routes/menuRoutes.js"
 
 import dotenv from "dotenv"
 dotenv.config({ path: "../.env" })
 
 const app = express()
-
+// Middleware
 app.use(express.json())
+app.use(cors())
 
-app.use("/auth", authRoutes)
-// sau khi login nếu thì dùng auth như sau 
-app.use("/user", auth, userRoutes)
+// Đăng ký và đăng nhập người dùng mới
+app.use("/api", userRoutes)
+
+// Chỉnh sửa menu
+app.use("/api/menuItem", menuRoutes)
+
 
 app.get("/", (req, res) => {
   res.send("Welcome to Cafe Management API")

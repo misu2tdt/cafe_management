@@ -4,134 +4,138 @@ import bcrypt from 'bcryptjs';
 const prisma = new PrismaClient();
 
 async function main() {
-  try {
-    console.log('🌱 Starting seed process...');
-    
-    // Hàm mã hóa mật khẩu
-    const hashPassword = async (password) => {
-      const salt = await bcrypt.genSalt(10);
-      return bcrypt.hash(password, salt);
-    };
+  await prisma.category.createMany({
+    data: [
+      { name: 'Coffee' },
+      { name: 'Tea' },
+      { name: 'Dessert' },
+      { name: 'Smoothie' },
+    ],
+  });
 
-    console.log('Creating users...');
-    // Insert nhiều Users cùng lúc với mật khẩu đã mã hóa
-    const [customerUser, staffUser, managerUser] = await Promise.all([
-      prisma.user.create({
-        data: {
-          fullname: 'Nguyễn Văn A',
-          phone: '0123456789',
-          email: 'a@example.com',
-          password: await hashPassword('pass123'),
-          role: 'CUSTOMER',
-          Customer: { create: {} },
-        },
-      }),
-      prisma.user.create({
-        data: {
-          fullname: 'Trần Thị B',
-          phone: '0987654321',
-          email: 'b@example.com',
-          password: await hashPassword('pass456'),
-          role: 'STAFF',
-          Staff: { create: { salary: 8000000 } },
-        },
-      }),
-      prisma.user.create({
-        data: {
-          fullname: 'Lê Văn C',
-          phone: '0111222333',
-          email: 'c@example.com',
-          password: await hashPassword('pass789'),
-          role: 'MANAGER',
-          Manager: { create: { salary: 12000000 } },
-        },
-      }),
-    ]);
-    console.log('✅ Users created successfully!');
+  const categoryMap = await prisma.category.findMany();
 
-    console.log('Creating menu items...');
-    // Insert nhiều MenuItem nhanh bằng createMany
-    await prisma.menuItem.createMany({
-      data: [
-        {
-          name: 'Cà phê sữa',
-          description: 'Cà phê pha với sữa đặc',
-          price: 25000,
-          quantity: 100,
-        },
-        {
-          name: 'Trà đào',
-          description: 'Trà đào mát lạnh',
-          price: 30000,
-          quantity: 80,
-        },
-      ],
-      skipDuplicates: true,
+  const itemsData = [
+    { name: 'Cappuccino', category: 'Coffee', basePrice: 45000 },
+    { name: 'Espresso', category: 'Coffee', basePrice: 40000 },
+    { name: 'Latte', category: 'Coffee', basePrice: 47000 },
+    { name: 'Matcha Latte', category: 'Tea', basePrice: 50000 },
+    { name: 'Milk Tea', category: 'Tea', basePrice: 43000 },
+    { name: 'Cheesecake', category: 'Dessert', basePrice: 55000 },
+    { name: 'Tiramisu', category: 'Dessert', basePrice: 56000 },
+    { name: 'Strawberry Smoothie', category: 'Smoothie', basePrice: 48000 },
+    { name: 'Mango Smoothie', category: 'Smoothie', basePrice: 49000 },
+    { name: 'Choco Lava Cake', category: 'Dessert', basePrice: 53000 },
+  ];
+
+  for (const item of itemsData) {
+    const category = categoryMap.find(c => c.name === item.category);
+    const image_filename = item.name.toLowerCase().replace(/ /g, '_') + '.jpg';
+
+    await prisma.menuItem.create({
+      data: {
+        name: item.name,
+        description: `${item.name} Description`,
+        price: item.basePrice,
+        categoryId: category.id,
+        imageURL: image_filename,
+      },
     });
-    console.log('✅ Menu items created successfully!');
+  }
 
-    // Lấy menu items đã tạo
-    const [coffee, tea] = await prisma.menuItem.findMany({
-      where: { name: { in: ['Cà phê sữa', 'Trà đào'] } },
-    });
+  const customers = await Promise.all([
+    createUser('Alice', '0900000001', 'alice@example.com', 'CUSTOMER'),
+    createUser('Bob', '0900000002', 'bob@example.com', 'CUSTOMER'),
+    createUser('Charlie', '0900000003', 'charlie@example.com', 'CUSTOMER'),
+    createUser('Diana', '0900000004', 'diana@example.com', 'CUSTOMER'),
+  ]);
 
-    if (!coffee || !tea) {
-      throw new Error('Failed to find created menu items!');
+  const staff = await Promise.all([
+    createUser('Eve', '0910000001', 'eve@example.com', 'STAFF', 8000000),
+    createUser('Frank', '0910000002', 'frank@example.com', 'STAFF', 8500000),
+    createUser('Grace', '0910000003', 'grace@example.com', 'STAFF', 8200000),
+  ]);
+
+  await createUser('Henry', '0920000001', 'henry@example.com', 'MANAGER', 15000000);
+
+  const allItems = await prisma.menuItem.findMany();
+  for (const customer of customers) {
+    const orderCount = Math.floor(Math.random() * 3) + 1;
+    for (let i = 0; i < orderCount; i++) {
+      const selectedStaff = staff[Math.floor(Math.random() * staff.length)];
+      const orderMenus = getFixedOrderMenus(allItems);
+      const total = orderMenus.reduce((sum, om) => sum + om.price * om.quantity, 0);
+
+      await prisma.order.create({
+        data: {
+          customerId: customer.id,
+          staffId: selectedStaff.id,
+          total,
+          createdAt: new Date(),
+          paymentMethod: i % 2 === 0 ? 'CASH' : 'CARD',
+          orderMenus: {
+            create: orderMenus,
+          },
+        },
+      });
     }
-
-    console.log('Creating order...');
-    // Tạo đơn hàng và orderItems cùng lúc
-    const order = await prisma.order.create({
-      data: {
-        customerId: customerUser.id,
-        staffId: staffUser.id,
-        total: 55000,
-        paymentMethod: 'CASH',
-        transactionDate: new Date(),
-        orderItems: {
-          create: [
-            { itemId: coffee.id, status: 'DONE', quantity: 1 },
-            { itemId: tea.id, status: 'DONE', quantity: 1 },
-          ],
-        },
-      },
-    });
-    console.log(`✅ Order created with ID: ${order.id}`);
-
-    console.log('Creating inventory...');
-    // Tạo inventory
-    const inventory = await prisma.inventory.create({
-      data: {
-        ingredientId: 1, // Lưu ý: Ở đây có thể cần tạo bảng Ingredients trước
-        name: 'Sữa đặc',
-        quantity: 50,
-        reorderLevel: 10,
-      },
-    });
-    console.log(`✅ Inventory created with ID: ${inventory.id}`);
-
-    console.log('Creating report...');
-    // Tạo report
-    const report = await prisma.report.create({
-      data: {
-        managerId: managerUser.id,
-        inventoryId: inventory.id,
-      },
-    });
-    console.log(`✅ Report created with ID: ${report.id}`);
-
-    console.log('🌱 Seed completed successfully!');
-  } catch (error) {
-    console.error('Error during seeding:', error);
-    throw error;
   }
 }
 
+function getFixedOrderMenus(menuItems) {
+  const itemCount = Math.floor(Math.random() * 3) + 1;
+  const selected = [];
+
+  for (let i = 0; i < itemCount; i++) {
+    const item = menuItems[Math.floor(Math.random() * menuItems.length)];
+    const sizeIndex = Math.floor(Math.random() * 3);
+    const size = ['S', 'M', 'L'][sizeIndex];
+    const price = item.price + sizeIndex * 5000;
+
+    selected.push({
+      menuItemId: item.id,
+      quantity: Math.floor(Math.random() * 2) + 1,
+      price,
+      size,
+      note: Math.random() > 0.7 ? 'No sugar' : null,
+      status: ['PENDING', 'PROCESSING', 'DONE'][Math.floor(Math.random() * 3)],
+    });
+  }
+
+  return selected;
+}
+
+const hashPassword = async (password) => {
+  const salt = await bcrypt.genSalt(10);
+  return bcrypt.hash(password, salt);
+};
+
+async function createUser(fullname, phone, email, role, salary = null) {
+  const user = await prisma.user.create({
+    data: {
+      fullname,
+      phone,
+      email,
+      password: await hashPassword('123456'),
+      role,
+    },
+  });
+
+  if (role === 'CUSTOMER') {
+    await prisma.customer.create({ data: { id: user.id } });
+  } else if (role === 'STAFF') {
+    await prisma.staff.create({ data: { id: user.id, salary } });
+  } else if (role === 'MANAGER') {
+    await prisma.manager.create({ data: { id: user.id, salary } });
+  }
+
+  return user;
+}
+
 main()
-  .catch((e) => {
-    console.error('Failed to seed database:', e);
-    process.exit(1);
-  })
-  .finally(async () => {
+  .then(async () => await prisma.$disconnect())
+  .catch(async (e) => {
+    console.error(e);
     await prisma.$disconnect();
+    process.exit(1);
   });
