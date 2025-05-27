@@ -1,21 +1,21 @@
-import express from "express";
+import express from "express"
 import {
   getAllOrdersController,
   getOrderByIdController,
   createOrderController,
   updateOrderStatusController,
-  deleteOrderController,
-} from "../controllers/orderController.js";
+  getMyOrdersController
+} from "../controllers/orderController.js"
 
-import authMiddleware from "../middlewares/Auth.js";
-import { staffOnly } from "../middlewares/Role.js"; 
+import authMiddleware from "../middlewares/Auth.js"
 
-const router = express.Router();
 
-router.get("/", authMiddleware, staffOnly, getAllOrdersController);
-router.get("/:id", authMiddleware, staffOnly, getOrderByIdController);
-router.post("/", authMiddleware, createOrderController); // nếu cho phép staff tạo
-router.put("/:id/status", authMiddleware, staffOnly, updateOrderStatusController);
-router.delete("/:id", authMiddleware, staffOnly, deleteOrderController);
+const router = express.Router()
 
-export default router;
+router.get("/", authMiddleware, getAllOrdersController)
+router.get("/:id", authMiddleware, getOrderByIdController)
+router.get("/customer/myOrders", authMiddleware, getMyOrdersController)
+router.post("/", authMiddleware, createOrderController)
+router.put("/:id/status", authMiddleware, updateOrderStatusController)
+
+export default router

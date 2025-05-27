@@ -14,22 +14,15 @@
   "description": "",
   "dependencies": {
     "@prisma/client": "^6.7.0",
-<<<<<<< HEAD
-=======
     "bcrypt": "^5.1.1",
->>>>>>> c1e20ae5c9eee136ff09ac97fea96b28e6b2af5e
     "bcryptjs": "^3.0.2",
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
-<<<<<<< HEAD
     "multer": "^1.4.5-lts.2",
     "pg": "^8.15.6",
     "prisma": "^6.7.0"
-=======
-    "pg": "^8.15.6"
->>>>>>> c1e20ae5c9eee136ff09ac97fea96b28e6b2af5e
   },
   "devDependencies": {
     "nodemon": "^3.1.10",

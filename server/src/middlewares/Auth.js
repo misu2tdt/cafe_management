@@ -1,20 +1,31 @@
-import jwt from 'jsonwebtoken';
+import jwt from 'jsonwebtoken'
 
 const authMiddleware = (req, res, next) => {
-  const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1]; // Bearer <token>
-
+  const token = req.headers.token || req.headers.authorization || req.headers['x-access-token']
+  
   if (!token) {
-    return res.status(401).json({ message: 'No token provided' });
+    return res.status(401).json({success: false, message: "Not authorized, please login again"})
   }
-
-  jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
-    if (err) {
-      return res.status(401).json({ message: 'Unauthorized' });
+  
+  try {
+    const token_decode = jwt.verify(token, process.env.JWT_SECRET)
+    req.user = {
+      id: token_decode.id,
+      role: token_decode.role,
     }
-    req.user = decoded; // 👈 Gán cả role, email, id,... nếu có
-    next();
-  });
-};
+    
+    if (!req.body) {
+      req.body = {}
+    }
+    
+    req.body.userId = token_decode.id
+    req.body.role = token_decode.role
+    
+    next()
+  } catch (error) {
+    console.log(error)
+    res.status(401).json({success: false, message: "Invalid or expired token"})
+  }
+}
 
-export default authMiddleware;
+export default authMiddleware

@@ -1,21 +1,27 @@
 import express from "express"
+import dotenv from "dotenv"
 import cors from "cors"
 import userRoutes from "./routes/userRoutes.js"
 import menuRoutes from "./routes/menuRoutes.js"
+import orderRoutes from "./routes/orderRoutes.js"
+import dashboardRoutes from "./routes/dashboardRoutes.js"
 
 dotenv.config({ path: "../.env" })
 
 const app = express()
-// Middleware
+
 app.use(express.json())
 app.use(cors())
 
-// Đăng ký và đăng nhập người dùng mới
-app.use("/api", userRoutes)
 
-// Chỉnh sửa menu
-app.use("/api/menuItem", menuRoutes)
+app.use("/users", userRoutes)
 
+app.use("/menuItems", menuRoutes)
+app.use("/images", express.static('uploads'))
+
+app.use("/orders", orderRoutes)
+
+app.use("/dashboard", dashboardRoutes)
 
 app.get("/", (req, res) => {
   res.send("Welcome to Cafe Management API")

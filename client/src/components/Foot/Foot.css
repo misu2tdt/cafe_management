@@ -1,0 +1,151 @@
+#footer {
+  background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+  color: #e0e0e0;
+  width: 100%;
+}
+
+.footer-content {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 30px;
+  padding: 40px 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.footer-section h2 {
+  font-size: 1.4em;
+  color: #FFD700;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.contact-info {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.info-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.info-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+  transform: translateX(3px);
+}
+
+.info-item strong {
+  color: #D4A574;
+  display: block;
+  margin-bottom: 5px;
+}
+
+.info-item p {
+  margin: 0;
+  color: #cccccc;
+}
+
+.info-item a {
+  color: #FFD700;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.info-item a:hover {
+  color: #FFF8DC;
+}
+
+.social-links {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.social-link {
+  width: 40px;
+  height: 40px;
+  background: #6B4423;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.social-link:hover {
+  background: #8B4513;
+  transform: translateY(-2px);
+}
+
+.map-container {
+  height: 200px;
+  border-radius: 10px;
+  overflow: hidden;
+  margin-top: 10px;
+}
+
+#gmap_canvas {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+.hours-list {
+  list-style: none;
+  padding: 0;
+}
+
+.hours-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.day {
+  color: #D4A574;
+}
+
+.time {
+  color: #FFD700;
+  font-family: monospace;
+}
+
+.special-note {
+  background: rgba(107, 68, 35, 0.2);
+  padding: 15px;
+  border-radius: 8px;
+  text-align: center;
+  margin-top: 15px;
+}
+
+.special-note p {
+  margin: 0;
+  color: #FFD700;
+  font-weight: 600;
+}
+
+.footer-bottom {
+  background: rgba(0, 0, 0, 0.3);
+  padding: 20px 0;
+  text-align: center;
+}
+
+.footer-bottom p {
+  margin: 5px 0;
+  color: #cccccc;
+}
+
+.tagline {
+  color: #D4A574;
+  font-style: italic;
+}

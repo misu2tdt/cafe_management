@@ -1,5 +1,5 @@
 import express from 'express'
-import { addItem, listItems, updateItem, deleteItem } from '../controllers/menuController.js'
+import { addItem, listItems, updateItem, listAllItems, disableItem, enableItem} from '../controllers/menuController.js'
 import authMiddleware from '../middlewares/Auth.js'
 import multer from 'multer'
 
@@ -16,8 +16,10 @@ const storage = multer.diskStorage({
 const upload = multer({storage: storage})
 
 router.post('/', authMiddleware, upload.single("imageURL"), addItem)
-router.get('/', authMiddleware, listItems)
+router.get('/', listItems)
+router.get('/list-all', authMiddleware, listAllItems)    
 router.put('/:id' , authMiddleware, updateItem)
-router.delete('/:id', authMiddleware, deleteItem)
+router.put('/disable/:id', authMiddleware, disableItem)  
+router.put('/enable/:id', authMiddleware, enableItem)   
 
 export default router

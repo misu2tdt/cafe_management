@@ -1,25 +1,23 @@
 import { PrismaClient } from "@prisma/client"
-import fs from "fs"
 
 const prisma = new PrismaClient()
 
-// Tạo 1 món nước mới
 export const addItem = async (req, res) => {
     let imageURL = `${req.file.filename}`
 
     const { name, price, description, categoryId } = req.body
     if (!name || !price || !description || !categoryId || !imageURL) {
-        return res.status(400).json({ message: "All fields are required" })
+        return res.json({ message: "Các mục cần phải điền hết" })
     }
     if (isNaN(price)) {
-        return res.status(400).json({ message: "Price must be a number" })
+        return res.json({ message: "Giá phải là một con số" })
     }
-    if (price < 0) {
-        return res.status(400).json({ message: "Price must be greater than 0" })
+    if (price <= 0) {
+        return res.json({ message: "Giá phải lớn hơn không" })
     }
 
     try {
-        const newItem = await prisma.menuItem.create({
+        await prisma.menuItem.create({
             data: { 
                 name, 
                 price: Number(price), 
@@ -28,21 +26,33 @@ export const addItem = async (req, res) => {
                 imageURL 
             }
         })
-        res.json({ success: true, message: "Added succesfully"})
+        res.json({ success: true, message: "Thêm thành công"})
     }
     catch (error) {
         console.log(error)
-        res.json({ success: false, message: "Error"})
+        res.json({ success: false, message: "Lỗi"})
     }
 }
 
 export const listItems = async (req, res) => {
     try {
+        const items = await prisma.menuItem.findMany({
+            where: { isDisable: false }
+        })
+        res.json(items)
+    } catch (error) {
+        console.log(error)
+        res.json({ message: "Không lấy được danh sách", error: error.message })
+    }
+}
+
+export const listAllItems = async (req, res) => {
+    try {
         const items = await prisma.menuItem.findMany()
         res.json(items)
     } catch (error) {
         console.log(error)
-        res.json({ message: "Cant get list", error: error.message })
+        res.json({ message: "Không lấy được danh sách", error: error.message })
     }
 }
 
@@ -51,17 +61,25 @@ export const updateItem = async (req, res) => {
     const { name, price, description, categoryId } = req.body
 
     if (!name || !price || !description || !categoryId) {
-        return res.status(400).json({ message: "All fields are required" })
+        return res.json({ message: "Các mục cần phải điền hết" })
     }
     if (isNaN(price)) {
-        return res.status(400).json({ message: "Price must be a number" })
+        return res.json({ message: "Giá phải là một con số" })
     }
     if (price < 0) {
-        return res.status(400).json({ message: "Price must be greater than 0" })
+        return res.json({ message: "Giá phải lớn hơn không" })
     }
 
     try {
-        const updatedItem = await prisma.menuItem.update({
+        const existingItem = await prisma.menuItem.findUnique({
+            where: { id: Number(id) }
+        })
+        
+        if (!existingItem) {
+            return res.status(404).json({ success: false, message: "Không tìm thấy món" })
+        }
+
+        await prisma.menuItem.update({
             where: { id: Number(id) },
             data: { 
                 name, 
@@ -70,41 +88,58 @@ export const updateItem = async (req, res) => {
                 categoryId: Number(categoryId) 
             }
         })
-        res.json(updatedItem)
+        res.json({success: true, message: "Cập nhật món thành công"})
     } catch (error) {
         console.log(error)
-        res.json({ message: "Service unavailable", error: error.message })
+        res.json({ success: false, message: "Service unavailable", error: error.message })
     }
 }
 
-export const deleteItem = async (req, res) => {
+export const disableItem = async (req, res) => {
     const { id } = req.params
 
     try {
-        // Lấy thông tin món ăn trước khi xóa để biết tên file ảnh
-        const itemToDelete = await prisma.menuItem.findUnique({
+        const existingItem = await prisma.menuItem.findUnique({
             where: { id: Number(id) }
-        });
+        })
         
-        if (!itemToDelete) {
-            return res.status(404).json({ success: false, message: "Item not found" });
+        if (!existingItem) {
+            return res.status(404).json({ success: false, message: "Không tìm thấy món" })
         }
         
-        // Xóa món ăn khỏi database
-        await prisma.menuItem.delete({
-            where: { id: Number(id) }
-        });
+        await prisma.menuItem.update({
+            where: { id: Number(id) },
+            data: { isDisable: true }
+        })
         
-        // Xóa file ảnh
-        fs.unlink(`uploads/${itemToDelete.imageURL}`, ()=>{})
-        
-        res.json({ success: true, message: "Item deleted successfully" });
+        res.json({ success: true, message: "Đã vô hiệu hóa món thành công" })
     } catch (error) {
-        console.error("Delete item error:", error);
-        // Kiểm tra xem lỗi có phải là do không tìm thấy món ăn không
-        if (error.code === 'P2025') {
-            return res.status(404).json({ success: false, message: "Item not found" });
-        }
-        res.status(500).json({ success: false, message: "Failed to delete item" });
+        console.error("Disable item error:", error)
+        res.status(500).json({ success: false, message: "Vô hiệu hóa món thất bại" })
     }
 }
+
+export const enableItem = async (req, res) => {
+    const { id } = req.params
+
+    try {
+        const existingItem = await prisma.menuItem.findUnique({
+            where: { id: Number(id) }
+        })
+        
+        if (!existingItem) {
+            return res.status(404).json({ success: false, message: "Không tìm thấy món" })
+        }
+        
+        await prisma.menuItem.update({
+            where: { id: Number(id) },
+            data: { isDisable: false }
+        })
+        
+        res.json({ success: true, message: "Đã kích hoạt lại món thành công" })
+    } catch (error) {
+        console.error("Enable item error:", error)
+        res.status(500).json({ success: false, message: "Kích hoạt món thất bại" })
+    }
+}
+

@@ -9,7 +9,7 @@ datasource db {
 
 enum Role {
   CUSTOMER
-  STAFF
+  EMPLOYEE
   MANAGER
 }
 
@@ -19,7 +19,7 @@ enum PaymentMethod {
   BANKING
 }
 
-enum OrderItemStatus {
+enum OrderStatus {
   PENDING
   PROCESSING
   DONE
@@ -41,7 +41,7 @@ model User {
   role      Role
 
   Customer  Customer?
-  Staff     Staff?
+  Employee  Employee?
   Manager   Manager?
 }
 
@@ -51,7 +51,7 @@ model Customer {
   orders  Order[]
 }
 
-model Staff {
+model Employee {
   id      Int     @id
   user    User    @relation(fields: [id], references: [id])
   salary  Int
@@ -59,34 +59,35 @@ model Staff {
 }
 
 model Manager {
-  id       Int      @id
-  user     User     @relation(fields: [id], references: [id])
+  id       Int     @id 
+  user     User    @relation(fields: [id], references: [id])
   salary   Int
   reports  Report[]
 }
 
 model Order {
   id              Int          @id @default(autoincrement())
-  customerId      Int
-  staffId         Int?
+  customerId      Int?
+  employeeId      Int?
+  OrderName       String?
   total           Int
-  createdAt DateTime
+  createdAt       DateTime    
   paymentMethod   PaymentMethod
+  status          OrderStatus   @default(PENDING)
 
-  customer        Customer     @relation(fields: [customerId], references: [id])
-  staff           Staff?       @relation(fields: [staffId], references: [id])
-  orderMenus      OrderMenu[]
+  customer        Customer?    @relation(fields: [customerId], references: [id])
+  employee        Employee?    @relation(fields: [employeeId], references: [id])
+  orderItems      OrderItem[]
 }
 
-model OrderMenu {
+model OrderItem {
   id         Int             @id @default(autoincrement())
   orderId    Int
   menuItemId Int
   quantity   Int
-  price      Int
   size       Size
+  price      Int    //Lưu trữ giá sau 
   note       String?
-  status     OrderItemStatus @default(PENDING)
 
   order      Order           @relation(fields: [orderId], references: [id])
   menuItem   MenuItem        @relation(fields: [menuItemId], references: [id])
@@ -98,10 +99,11 @@ model MenuItem {
   description String
   price       Int
   categoryId  Int
-  imageURL   String
+  imageURL    String
+  isDisable   Boolean     @default(false)
 
   category    Category    @relation(fields: [categoryId], references: [id])
-  orderMenus  OrderMenu[]
+  orderItems  OrderItem[]
 }
 
 model Category {
@@ -113,15 +115,13 @@ model Category {
 model Ingredient {
   id          Int         @id @default(autoincrement())
   name        String      @unique
+  quantity    Int
   inventories Inventory[]
 }
 
 model Inventory {
   id            Int        @id @default(autoincrement())
   ingredientId  Int
-  name          String
-  quantity      Int
-  reorderLevel  Int
 
   ingredient    Ingredient @relation(fields: [ingredientId], references: [id])
   reports       Report[]
