@@ -1,6 +1,6 @@
 # Coffee Store Management
 
-A coffee shop management system built with Node.js, Prisma, and Docker.
+Coffee Store Management – Fullstack web app for managing a coffee shop, including customer ordering, staff order tracking, and admin menu management. Built with React, Node.js, Express, PostgreSQL, JWT auth, and deployed via Docker. Features user authentication, image upload, order tracking, and Prisma ORM.
 
 ## How to Run Using Docker
 
