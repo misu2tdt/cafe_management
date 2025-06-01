@@ -1,30 +1,30 @@
 # Coffee Store Management
 
-Hệ thống quản lý cửa hàng cà phê được xây dựng với Node.js, Prisma và Docker.
+A coffee shop management system built with Node.js, Prisma, and Docker.
 
-## Hướng dẫn chạy bằng Docker
+## How to Run Using Docker
 
 ```bash
-# Bước 1: Sao chép file môi trường
+# Step 1: Copy environment configuration file
 cp server/.env.example server/.env
 
-# Bước 2: Di chuyển vào thư mục server
+# Step 2: Navigate to the server directory
 cd server
 
-# Bước 3: Build Docker container
+# Step 3: Build Docker container
 docker compose build
 
-# Bước 4: Tạo cơ sở dữ liệu bằng Prisma
+# Step 4: Create database schema using Prisma
 docker compose run backend npx prisma migrate dev --name init
 
-# Bước 5: Khởi động container
+# Step 5: Start the container
 docker compose up -d
 
-# Bước 6: Chạy seed để insert dữ liệu mẫu
+# Step 6: Run seed script to insert sample data
 docker compose exec backend npm run seed
 
-# Bước 7: Mở Prisma Studio để kiểm tra dữ liệu
+# Step 7: Open Prisma Studio to check database
 docker compose exec backend npx prisma studio
 
-# Nếu muốn reset toàn bộ database (xóa volume)
+# To reset the database completely (delete volume)
 docker compose down -v
